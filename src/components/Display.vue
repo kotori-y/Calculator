@@ -1,6 +1,6 @@
 <template>
   <div class="display">
-    <input v-model="result" :style="`font-size: ${fontSize}px`" class="result" disabled readonly>
+    <input v-model="result" :style="`font-size: ${fontSize}%`" class="result" disabled readonly>
   </div>
 </template>
 
@@ -9,18 +9,19 @@ export default {
   name: "Display",
   data() {
     return {
-      fontSize: 40
+      fontSize: 280
     }
   },
   methods: {
     adjustFontSize() {
-      if (this.fontSize > 20) {
-        const w = document.querySelector(".display").clientWidth
-        const el = document.querySelector(".result")
-        if (el.scrollWidth >= w) {
-          this.fontSize -= 4
-        }
+      let n = this.$store.state.currNum.length
+      n = n > 8 ? n : 8
+      const tmp = 8 / n * 280
+      if (tmp > 40) {
+        this.fontSize = tmp
+        return;
       }
+      this.$store.dispatch("toScientificNum")
     },
   },
   computed: {
@@ -31,11 +32,7 @@ export default {
   watch: {
     result: {
       immediate: true,
-      handler(value) {
-        if (value.length === 1) {
-          this.fontSize = 40
-          return
-        }
+      handler() {
         this.adjustFontSize()
       },
     },

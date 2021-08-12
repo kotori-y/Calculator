@@ -1,7 +1,7 @@
 <template>
   <div class="numbers">
     <div v-for="number in numbers" :key="number" :class="{number: true, zero: number===0}"
-         @mousedown="clickNumber($event)" @mouseup="addNumber($event)" @mouseleave="addNumber($event)">{{ number }}
+         @mousedown="clickNumber($event)" @mouseup="releaseNumber($event)" @mouseleave="releaseNumber($event)">{{ number }}
     </div>
   </div>
 </template>
@@ -24,18 +24,33 @@ export default {
       const el = $event.currentTarget
       el.classList.add("active")
     },
-    addNumber($event) {
+    releaseNumber($event) {
       const el = $event.currentTarget
       if (el.classList.contains("active")) {
-        const num = el.innerHTML.trim()
-        if (num === ".") {
-          this.$store.dispatch("addFloat", {num: num})
-        } else {
-          this.$store.dispatch("addNum", {num: num})
-        }
+        const num = $event.key || el.innerHTML.trim()
+        this.addNumber(num)
         el.classList.remove("active")
       }
+    },
+    addNumber(num) {
+      if (num === ".") {
+        this.$store.dispatch("addFloat", {num: num})
+      } else {
+        this.$store.dispatch("addNum", {num: num})
+      }
     }
+  },
+  mounted() {
+    document.addEventListener("keydown", $event => {
+      const key = $event.key
+      if (!isNaN(parseFloat(key)) || key === ".") {
+        this.addNumber(key)
+        return;
+      }
+      if (key==="Backspace") {
+        this.$store.dispatch("backspaceNum")
+      }
+    })
   }
 
 }

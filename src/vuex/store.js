@@ -24,7 +24,7 @@ Math.a = function () {
   const f = _cf.apply(null, arguments);
   if (f === undefined) return undefined;
 
-  function cb(x, y, i, o) {
+  function cb(x, y) {
     return x + f * y;
   }
 
@@ -39,7 +39,7 @@ Math.s = function (l, r) {
 Math.m = function () {
   const f = _cf.apply(null, arguments);
 
-  function cb(x, y, i, o) {
+  function cb(x, y) {
     return (x * f) * (y * f) / (f * f);
   }
 
@@ -59,6 +59,7 @@ const state = {
   status: true, // false: input; true: waiting
   flag: false, // < 0 ?
   float: false,
+  scientificNum: false,
 }
 
 const actions = {
@@ -73,6 +74,12 @@ const actions = {
       context.commit("GET_OPPOSITE_NUM")
     }
   },
+  backspaceNum(context) {
+    context.commit("BACKSPACE_NUM")
+  },
+  toScientificNum(context) {
+    context.commit("TO_SCIENTIFIC_NUM")
+  },
   allClear(context) {
     context.commit("ALL_CLEAR")
   },
@@ -86,7 +93,7 @@ const mutations = {
     value = value.trim()
     if (state.status || state.currNum === "0") {
       state.currNum = value
-      state.status = 0
+      state.status = false
       return;
     }
     if (state.currNum !== value || value !== "0") {
@@ -108,17 +115,45 @@ const mutations = {
     state.flag = ~state.flag
 
   },
-  ALL_CLEAR(state) {
-    state.currNum = "0"
+  BACKSPACE_NUM(state) {
+    const n = state.currNum.length
+    if (n > 2) {
+      state.currNum = state.currNum.slice(0, state.currNum.length-1)
+      return;
+    }
+    if (n === 1) {
+      state.currNum = "0"
+      return;
+    }
+    if (n === 2) {
+      if (state.flag) {
+        state.currNum = "0"
+        return;
+      }
+    }
+    state.currNum = state.currNum[0]
+  },
+  TO_SCIENTIFIC_NUM(state) {
+    if (!state.scientificNum) {
+      state.currNum = parseFloat(state.currNum).toExponential()
+      state.scientificNum = true
+      return;
+    }
+    state.currNum = "To Large"
     state.status = true
-    state.float = false
-    state.flag = false
   },
   DIVISION: function (state, param) {
     const {numA, numB} = param
     const ans = Math.d(numA, numB)
     state.currNum = String(ans)
-  }
+  },
+  ALL_CLEAR(state) {
+    state.currNum = "0"
+    state.status = true
+    state.float = false
+    state.flag = false
+    state.scientificNum = false
+  },
 }
 
 const store = new Vuex.Store({
