@@ -13,7 +13,8 @@
     "core-js": "^3.6.5",
     "electron": "^13.1.8",
     "electron-reloader": "^1.2.1",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "vuex": "^3.6.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

@@ -27,11 +27,15 @@ export default {
     addNumber($event) {
       const el = $event.currentTarget
       if (el.classList.contains("active")) {
+        const num = el.innerHTML.trim()
+        if (num === ".") {
+          this.$store.dispatch("addFloat", {num: num})
+        } else {
+          this.$store.dispatch("addNum", {num: num})
+        }
         el.classList.remove("active")
       }
-
     }
-
   }
 
 }

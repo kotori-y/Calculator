@@ -1,6 +1,6 @@
 <template>
   <div class="display">
-    <input style="-webkit-app-region: drag" class="result" v-model="result" disabled readonly>
+    <input v-model="result" :style="`font-size: ${fontSize}px`" class="result" disabled readonly>
   </div>
 </template>
 
@@ -9,9 +9,37 @@ export default {
   name: "Display",
   data() {
     return {
-      result: 0
+      fontSize: 40
     }
   },
+  methods: {
+    adjustFontSize() {
+      if (this.fontSize > 20) {
+        const w = document.querySelector(".display").clientWidth
+        const el = document.querySelector(".result")
+        if (el.scrollWidth >= w) {
+          this.fontSize -= 4
+        }
+      }
+    },
+  },
+  computed: {
+    result() {
+      return this.$store.state.currNum
+    },
+  },
+  watch: {
+    result: {
+      immediate: true,
+      handler(value) {
+        if (value.length === 1) {
+          this.fontSize = 40
+          return
+        }
+        this.adjustFontSize()
+      },
+    },
+  }
 }
 </script>
 
@@ -29,12 +57,12 @@ export default {
 }
 
 .result {
+  -webkit-app-region: drag;
   padding: 0;
   border-style: none;
   height: 50%;
   width: 98%;
   resize: none;
-  font-size: 40px;
   color: #FFFFFF;
   background: transparent;
   -webkit-user-select: none;

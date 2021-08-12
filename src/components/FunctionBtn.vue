@@ -1,7 +1,8 @@
 <template>
   <div class="functions">
-    <div v-for="(btn, index) in buttons" :key="index" class="function" @mousedown="clickFunc($event)"
-         @mouseup="doFunc($event)" @mouseleave="doFunc($event)">{{ btn }}
+    <div v-for="(btn, index) in buttons" :id="index" :key="index" class="function"
+         @mousedown="clickFunc($event)"
+         @mouseleave="doFunc($event)" @mouseup="doFunc($event)">{{ showBtn(btn) }}
     </div>
   </div>
 </template>
@@ -11,17 +12,46 @@ export default {
   name: "FunctionBtn",
   data() {
     return {
-      buttons: ["AC", "+/-", "%"]
+      buttons: [
+        "AC", "+/-", "%"
+      ]
     }
   },
   methods: {
+    showBtn(btn) {
+      if (btn !== "AC") {
+        return btn
+      }
+      return this.$store.state.status ? "AC" : "C"
+    },
+    allClear() {
+      this.$store.dispatch("allClear")
+    },
+    getOppositeNum() {
+      this.$store.dispatch("getOppositeNum")
+    },
+    percentage() {
+      const numA = this.$store.state.currNum
+      this.$store.dispatch("division", {numA: numA, numB: "100"})
+    },
     clickFunc($event) {
       const el = $event.currentTarget
       el.classList.add("active")
     },
-    doFunc($event){
+    doFunc($event) {
       const el = $event.currentTarget
       if (el.classList.contains("active")) {
+        switch (el.id) {
+          case "0":
+            this.allClear();
+            break;
+          case "1":
+            this.getOppositeNum()
+            break;
+          case "2":
+            this.percentage()
+            break;
+        }
         el.classList.remove("active")
       }
     }
