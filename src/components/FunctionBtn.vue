@@ -31,7 +31,7 @@ export default {
       this.$store.dispatch("getOppositeNum")
     },
     percentage() {
-      const numA = this.$store.state.currNum
+      const numA = this.$store.state.showNum
       this.$store.dispatch("division", {numA: numA, numB: "100"})
     },
     clickFunc($event) {

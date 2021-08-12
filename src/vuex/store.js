@@ -53,13 +53,14 @@ Math.d = function (l, r) {
 
 
 const state = {
-  currNum: "0",
+  showNum: "0",
   prevNum: null,
+  currNum: null,
   operator: null,
   status: true, // false: input; true: waiting
   flag: false, // < 0 ?
   float: false,
-  scientificNum: false,
+  scientificNum: 0, // 0: normal; 1: sci; 2: sci * 2
 }
 
 const actions = {
@@ -70,7 +71,7 @@ const actions = {
     context.commit("ADD_FLOAT", param.num)
   },
   getOppositeNum(context) {
-    if (state.currNum !== "0") {
+    if (state.showNum !== "0") {
       context.commit("GET_OPPOSITE_NUM")
     }
   },
@@ -90,69 +91,78 @@ const actions = {
 
 const mutations = {
   ADD_NUM(state, value) {
-    value = value.trim()
-    if (state.status || state.currNum === "0") {
-      state.currNum = value
+    if (state.status || state.showNum === "0") {
+      state.showNum = value
       state.status = false
       return;
     }
-    if (state.currNum !== value || value !== "0") {
-      state.currNum = state.currNum.concat(value)
+    if (state.showNum !== value || value !== "0") {
+      switch (state.scientificNum) {
+        case 0:
+          state.showNum = state.showNum.concat(value);
+          break;
+        case 1:
+          state.currNum = state.currNum
+            ? state.currNum.concat(value)
+            : state.showNum.concat(value)
+          state.showNum = parseFloat(state.currNum).toExponential();
+          break;
+        case 2:
+          state.showNum = "To Large"
+          state.currNum = null
+          state.scientificNum = 0;
+          break;
+      }
     }
   },
   ADD_FLOAT(state, value) {
     value = value.trim()
     if (!state.float) {
-      state.currNum = state.currNum.concat(value)
+      state.showNum = state.showNum.concat(value)
       state.status = false
       state.float = true
     }
   },
   GET_OPPOSITE_NUM(state) {
-    state.currNum = state.flag
-      ? state.currNum.slice(1,)
-      : "-".concat(state.currNum)
+    state.showNum = state.flag
+      ? state.showNum.slice(1,)
+      : "-".concat(state.showNum)
     state.flag = ~state.flag
 
   },
   BACKSPACE_NUM(state) {
-    const n = state.currNum.length
+    const n = state.showNum.length
     if (n > 2) {
-      state.currNum = state.currNum.slice(0, state.currNum.length-1)
+      state.showNum = state.showNum.slice(0, state.showNum.length - 1)
       return;
     }
     if (n === 1) {
-      state.currNum = "0"
+      state.showNum = "0"
       return;
     }
     if (n === 2) {
       if (state.flag) {
-        state.currNum = "0"
+        state.showNum = "0"
         return;
       }
     }
-    state.currNum = state.currNum[0]
+    state.showNum = state.showNum[0]
   },
   TO_SCIENTIFIC_NUM(state) {
-    if (!state.scientificNum) {
-      state.currNum = parseFloat(state.currNum).toExponential()
-      state.scientificNum = true
-      return;
-    }
-    state.currNum = "To Large"
-    state.status = true
+    state.scientificNum++
   },
   DIVISION: function (state, param) {
     const {numA, numB} = param
     const ans = Math.d(numA, numB)
-    state.currNum = String(ans)
+    state.showNum = String(ans)
   },
   ALL_CLEAR(state) {
-    state.currNum = "0"
+    state.showNum = "0"
+    state.currNum = null
     state.status = true
     state.float = false
     state.flag = false
-    state.scientificNum = false
+    state.scientificNum = 0
   },
 }
 

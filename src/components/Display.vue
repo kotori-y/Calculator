@@ -14,10 +14,10 @@ export default {
   },
   methods: {
     adjustFontSize() {
-      let n = this.$store.state.currNum.length
+      let n = this.$store.state.showNum.length
       n = n > 8 ? n : 8
       const tmp = 8 / n * 280
-      if (tmp > 40) {
+      if (tmp >= 37) {
         this.fontSize = tmp
         return;
       }
@@ -26,7 +26,7 @@ export default {
   },
   computed: {
     result() {
-      return this.$store.state.currNum
+      return this.$store.state.showNum
     },
   },
   watch: {
